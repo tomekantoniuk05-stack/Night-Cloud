@@ -6,7 +6,7 @@ from PIL import ImageTk, Image
 import getFiles
 from getFiles import *
 import animations as anim
-from config import *
+from configs import *
 from textEditor import TextEditor
 from time import sleep
 
