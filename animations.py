@@ -8,8 +8,10 @@ def loadingAnimation(root, label):
     root.after(333, lambda: loadingAnimation(root, label))
 
 previousOpenedButton = None #(previous seen edit button)
-def show_button(btn=None):
+def show_button(btn=None, reset=False):
     global previousOpenedButton
+    if reset:
+        previousOpenedButton = None
     if previousOpenedButton:
         previousOpenedButton.place_forget()
     if btn:
