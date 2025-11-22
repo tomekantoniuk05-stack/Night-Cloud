@@ -246,6 +246,6 @@ for name, btn in guziczkiZakladek.items():
         btn.config(command=onClose)
 
 #print(get_a_nc_file(dataTeraz.strftime("%m-%Y"), dataTeraz.day))
-#
+
 root.deiconify()
 root.mainloop()
