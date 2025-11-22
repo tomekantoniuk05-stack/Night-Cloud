@@ -1,0 +1,1 @@
+DNI_TYGODNIA = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
