@@ -2,12 +2,14 @@ import tkinter as tk
 from random import randint
 from datetime import datetime, date
 import calendar
-
 from PIL import ImageTk, Image
+import getFiles
 from getFiles import *
 import animations as anim
 from config import *
 from textEditor import TextEditor
+from time import sleep
+
 
 loadingRoot = tk.Tk()
 loadingRoot.withdraw()
@@ -119,91 +121,126 @@ tk_teamLogo = ImageTk.PhotoImage(teamLogo)
 teamLogoLabel = tk.Label(kontentZakladek["Credits"], image=tk_teamLogo, bg=kontentZakladek["Credits"]["bg"])
 teamLogoLabel.place(relx=0.5, rely=0.5, anchor="center")
 
+#for later
+kontentSnu = tk.Frame(content_frame, bg=root["bg"])
+kontentSnu.pack(fill="both", anchor="center")
+kontentZakladek["Dream"] = kontentSnu
+
 #sleep journal
-konentSleepJournal = tk.Frame(content_frame, bg=root["bg"])
-konentSleepJournal.pack(fill="both", anchor="center")
-kontentZakladek["Sleep Journal"] = konentSleepJournal
-
-konentSnu = tk.Frame(content_frame, bg=root["bg"])
-konentSnu.pack(fill="both", anchor="center")
-kontentZakladek["Dream"] = konentSnu
-
-dataTeraz = datetime.now()
-pierwszyDzienMiesiaca, liczbaDniWMiesiecu = calendar.monthrange(dataTeraz.year, dataTeraz.month)
-
-calendarFrame = tk.Frame(konentSleepJournal, bg=root["bg"])
-calendarFrame.place(rely=0.5, relx=0.5, relheight=0.95, relwidth=0.8, anchor="center")
-
-#creating day name display
-dniTygodniaFrame = tk.Frame(calendarFrame, bg="firebrick3", height=75)
-dniTygodniaFrame.pack(fill="both", side="top")
-for dzien in range(0, 7):
-    frameStroke = tk.Frame(dniTygodniaFrame, bg="white", height=75)
-    frameStroke.pack(expand=True, fill="both", side="left")
-    frame = tk.Frame(frameStroke, bg="white")
-    frame.place(rely=0.5, relx=0.5, relheight=0.9, relwidth=0.9, anchor="center")
-    textLabel = tk.Label(frame, text=DNI_TYGODNIA[dzien], fg="white", bg="purple2", font=("Arial", 15, "bold"))
-    textLabel.pack(fill="both", expand=True, anchor="center")
-
 framesOfTheWeeks = []
 framesOfDaysStrokes = []
 framesOfDays = []
 numberOfDayLabel = []
 buttonsOfDreams = []
-for week in range(1, 7):
-    frameTygodnia = tk.Frame(calendarFrame, bg=root["bg"], height=150)
-    frameTygodnia.pack(fill="both", side="top", expand=True)
-    framesOfTheWeeks.append(frameTygodnia)
-    for day in range(1, 8):
-        dayFrameStroke = tk.Frame(frameTygodnia, bg="white", height=100)
-        dayFrameStroke.pack(expand=True, fill="both", side="left")
-        framesOfDaysStrokes.append(dayFrameStroke)
-        #to była ramka, teraz pora na zawartość
-        dayFrame = tk.Frame(dayFrameStroke, bg=root["bg"])
-        dayFrame.place(rely=0.5, relx=0.5, relheight=0.9, relwidth=0.9, anchor="center")
-        framesOfDays.append(dayFrame)
-        #teraz data
-        dayNr = (week-1)*7+day-pierwszyDzienMiesiaca
-        dayLabel = tk.Label(dayFrame, text=dayNr, font=("Arial", 16), fg="white", bg=root["bg"])
-        dayLabel.place(relx=1.0, rely=0.0, anchor="ne", x=-10, y=10)
-        numberOfDayLabel.append(dayLabel)
-        #teraz guziczki :)
-        dreamButton = tk.Button(dayFrame, text="Edit", font=("Arial", 16), fg="white", bg="SlateBlue2", activebackground="RoyalBlue2", bd=0, cursor="hand2", command=lambda day=dayNr: show_tab(None, day))
-        #dreamButton.place(relx=0.0, rely=0.0, anchor="nw", x=10, y=10)
-        dayFrame.bind("<Enter>", lambda e, btn=dreamButton: anim.show_button(btn))
-        dayFrame.bind("<Leave>", lambda e, btn=dreamButton, frame=dayFrameStroke: anim.hide_button(e, btn, frame))
-        buttonsOfDreams.append(dreamButton)
-konentSleepJournal.bind("<Enter>", lambda e: anim.show_button())
-dniTygodniaFrame.bind("<Enter>", lambda e: anim.show_button())
+dreamTitles = []
+kontentSleepJournal = None
+dataTeraz = None
+def create_sleep_journal_tab():
+    global kontentSleepJournal
+    global framesOfTheWeeks
+    global framesOfDaysStrokes
+    global framesOfDays
+    global numberOfDayLabel
+    global buttonsOfDreams
+    global dreamTitles
+    global dataTeraz
 
-#usuwanie pierwszych dni poprzedniego tygodnia
-dataPoprzedniegoMiesiaca = dataTeraz
-if dataTeraz.month == 1:
-    date(dataPoprzedniegoMiesiaca.year - 1, 12, 1)
-else:
-    dataPoprzedniegoMiesiaca = date(dataPoprzedniegoMiesiaca.year, dataPoprzedniegoMiesiaca.month - 1 , 1)
+    if kontentSleepJournal:
+        kontentSleepJournal.destroy()
+        framesOfTheWeeks = []
+        framesOfDaysStrokes = []
+        framesOfDays = []
+        numberOfDayLabel = []
+        buttonsOfDreams = []
+        dreamTitles = []
 
-dlugoscPoprzedniegoMiesiaca = calendar.monthrange(dataPoprzedniegoMiesiaca.year, dataPoprzedniegoMiesiaca.month)[1]
-for i in range(0, pierwszyDzienMiesiaca):
-    frame = framesOfDaysStrokes.pop(0)
-    framesOfDays.pop(0)
-    frame.config(bg="grey25")
-    numberLabel = numberOfDayLabel.pop(0)
-    numberLabel.config(text=dlugoscPoprzedniegoMiesiaca-pierwszyDzienMiesiaca+i+1, fg="grey25")
-    buttonsOfDreams.pop(0)
-#teraz usuwanie ostatnich dni
-for i in range(0, len(framesOfDaysStrokes) - liczbaDniWMiesiecu):
-    frame = framesOfDaysStrokes.pop(liczbaDniWMiesiecu)
-    framesOfDays.pop(liczbaDniWMiesiecu)
-    frame.config(bg="grey25")
-    numberLabel = numberOfDayLabel.pop(liczbaDniWMiesiecu)
-    numberLabel.config(text=i+1, fg="grey25")
-    buttonsOfDreams.pop(liczbaDniWMiesiecu)
+    kontentSleepJournal = tk.Frame(content_frame, bg=root["bg"])
+    kontentZakladek["Sleep Journal"] = kontentSleepJournal
 
-framesOfDays[dataTeraz.day - 1].config(bg="maroon2")
-for kid in framesOfDays[dataTeraz.day - 1].winfo_children():
-    if kid["bg"] == root["bg"]:
-        kid.config(bg=framesOfDays[dataTeraz.day - 1]["bg"])
+    dataTeraz = datetime.now()
+    pierwszyDzienMiesiaca, liczbaDniWMiesiecu = calendar.monthrange(dataTeraz.year, dataTeraz.month)
+
+    calendarFrame = tk.Frame(kontentSleepJournal, bg=root["bg"])
+    calendarFrame.place(rely=0.5, relx=0.5, relheight=0.95, relwidth=0.8, anchor="center")
+
+    # creating day name display
+    dniTygodniaFrame = tk.Frame(calendarFrame, bg="firebrick3", height=75)
+    dniTygodniaFrame.pack(fill="both", side="top")
+    for dzien in range(0, 7):
+        frameStroke = tk.Frame(dniTygodniaFrame, bg="white", height=75)
+        frameStroke.pack(expand=True, fill="both", side="left")
+        frame = tk.Frame(frameStroke, bg="white")
+        frame.place(rely=0.5, relx=0.5, relheight=0.9, relwidth=0.9, anchor="center")
+        textLabel = tk.Label(frame, text=DNI_TYGODNIA[dzien], fg="white", bg="purple2", font=("Arial", 15, "bold"))
+        textLabel.pack(fill="both", expand=True, anchor="center")
+
+    for week in range(1, 7):
+        frameTygodnia = tk.Frame(calendarFrame, bg=root["bg"], height=150)
+        frameTygodnia.pack(fill="both", side="top", expand=True)
+        framesOfTheWeeks.append(frameTygodnia)
+        for day in range(1, 8):
+            dayFrameStroke = tk.Frame(frameTygodnia, bg="white", height=100)
+            dayFrameStroke.pack(expand=True, fill="both", side="left")
+            framesOfDaysStrokes.append(dayFrameStroke)
+            # to była ramka, teraz pora na zawartość
+            dayFrame = tk.Frame(dayFrameStroke, bg=root["bg"])
+            dayFrame.place(rely=0.5, relx=0.5, relheight=0.9, relwidth=0.9, anchor="center")
+            framesOfDays.append(dayFrame)
+            # teraz data
+            dayNr = (week - 1) * 7 + day - pierwszyDzienMiesiaca
+            dayLabel = tk.Label(dayFrame, text=dayNr, font=("Arial", 16), fg="white", bg=root["bg"])
+            dayLabel.place(relx=1.0, rely=0.0, anchor="ne", x=-10, y=10)
+            numberOfDayLabel.append(dayLabel)
+            # teraz guziczki :)
+            dreamButton = tk.Button(dayFrame, text="Edit", font=("Arial", 16), fg="white", bg="SlateBlue2",
+                                    activebackground="RoyalBlue2", bd=0, cursor="hand2",
+                                    command=lambda day=dayNr: show_tab(None, day))
+            dayFrame.bind("<Enter>", lambda e, btn=dreamButton: anim.show_button(btn))
+            dayFrame.bind("<Leave>", lambda e, btn=dreamButton, frame=dayFrameStroke: anim.hide_button(e, btn, frame))
+            buttonsOfDreams.append(dreamButton)
+            # teraz tytuł snu
+            dreamTitle = tk.Label(dayFrame, font=("Arial", 13, "bold"), fg="white", bg=dayFrame["bg"])
+            savedFile = get_a_nc_file(dataTeraz.strftime("%m-%Y"), dayNr)
+            title = None
+            if os.path.exists(savedFile):
+                with open(savedFile, "r", encoding="utf-8") as f:
+                    title = f.read().split("'")[0]
+                if title:
+                    if len(title) > 23:
+                        title = title[:20] + "..."
+                    dreamTitle["text"] = title
+            dreamTitle.place(relx=0.025, rely=0.57, relwidth=0.95, relheight=0.4)
+    kontentSleepJournal.bind("<Enter>", lambda e: anim.show_button())
+    dniTygodniaFrame.bind("<Enter>", lambda e: anim.show_button())
+
+    # usuwanie pierwszych dni poprzedniego tygodnia
+    dataPoprzedniegoMiesiaca = dataTeraz
+    if dataTeraz.month == 1:
+        date(dataPoprzedniegoMiesiaca.year - 1, 12, 1)
+    else:
+        dataPoprzedniegoMiesiaca = date(dataPoprzedniegoMiesiaca.year, dataPoprzedniegoMiesiaca.month - 1, 1)
+
+    dlugoscPoprzedniegoMiesiaca = calendar.monthrange(dataPoprzedniegoMiesiaca.year, dataPoprzedniegoMiesiaca.month)[1]
+    for i in range(0, pierwszyDzienMiesiaca):
+        frame = framesOfDaysStrokes.pop(0)
+        framesOfDays.pop(0)
+        frame.config(bg="grey25")
+        numberLabel = numberOfDayLabel.pop(0)
+        numberLabel.config(text=dlugoscPoprzedniegoMiesiaca - pierwszyDzienMiesiaca + i + 1, fg="grey25")
+        buttonsOfDreams.pop(0)
+    # teraz usuwanie ostatnich dni
+    for i in range(0, len(framesOfDaysStrokes) - liczbaDniWMiesiecu):
+        frame = framesOfDaysStrokes.pop(liczbaDniWMiesiecu)
+        framesOfDays.pop(liczbaDniWMiesiecu)
+        frame.config(bg="grey25")
+        numberLabel = numberOfDayLabel.pop(liczbaDniWMiesiecu)
+        numberLabel.config(text=i + 1, fg="grey25")
+        buttonsOfDreams.pop(liczbaDniWMiesiecu)
+
+    framesOfDays[dataTeraz.day - 1].config(bg="maroon2")
+    for kid in framesOfDays[dataTeraz.day - 1].winfo_children():
+        if kid["bg"] == root["bg"]:
+            kid.config(bg=framesOfDays[dataTeraz.day - 1]["bg"])
 
 previousOpened = None
 textEditorFrame = None
@@ -216,12 +253,11 @@ def show_tab(name=None, dreamDay=None):
         textEditorFrame.destroy()
         del textEditorFrame
     if name == "Sleep Journal":
-        anim.show_button()
+        anim.show_button(reset=True)
+        create_sleep_journal_tab()
     if previousOpened and previousOpened != "Dream":
         guziczkiZakladek[previousOpened].config(bg=root["bg"])
-    previousOpened = name or "Dream"
-    for f in kontentZakladek.values():
-        f.pack_forget()
+
     if name:
         guziczkiZakladek[name].config(bg="grey20")
         kontentZakladek[name].pack(fill="both", expand=True)
@@ -230,12 +266,17 @@ def show_tab(name=None, dreamDay=None):
         textEditorFrame = TextEditor(root, kontentZakladek["Dream"], settings, get_a_nc_file(dataTeraz.strftime("%m-%Y"), dreamDay))
         kontentZakladek["Dream"].pack(fill="both", expand=True)
 
+    if previousOpened:
+        kontentZakladek[previousOpened].pack_forget()
+    previousOpened = name or "Dream"
+
 show_tab("Sleep Journal")
 
 def onClose():
     guziczkiZakladek["Exit"].config(text="Bye!")
     save_settings(settings)
     root.destroy()
+    getFiles.delete_empty_directors()
 root.protocol("WM_DELETE_WINDOW", onClose)
 
 #podpięcie przycisków
@@ -244,8 +285,6 @@ for name, btn in guziczkiZakladek.items():
         btn.config(command=lambda n=name: show_tab(n))
     else:
         btn.config(command=onClose)
-
-#print(get_a_nc_file(dataTeraz.strftime("%m-%Y"), dataTeraz.day))
 
 root.deiconify()
 root.mainloop()
