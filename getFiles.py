@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from calendar import monthrange
 
 dataFolderPath = ""
 dreamJournalFolderPath = ""
@@ -49,8 +50,24 @@ def get_a_journal(monthAndYear):
     return journalFolderPath
 
 def get_a_nc_file(monthAndYear, day):
+    if day <= 0:
+        splitedText = monthAndYear.split("-")
+        splitedText[0] = int(splitedText[0]) - 1
+        splitedText[1] = int(splitedText[1])
+        if splitedText[0] == 0:
+            splitedText[0] = 12
+            splitedText[1] = splitedText[1] - 1
+        monthAndYear = str(splitedText[0]) + "-" + str(splitedText[1])
+        day = monthrange(splitedText[1], splitedText[0])[1] + day # day is a negative number (or 0) here
     if type(day) != str:
         day = str(day)
     dreamJournalMonth = get_a_journal(monthAndYear)
     dream = os.path.join(dreamJournalMonth, "day_" + day + ".nc")
     return dream
+
+def delete_empty_directors():
+    for dir in os.listdir(dreamJournalFolderPath):
+        try:
+            os.rmdir(os.path.join(dreamJournalFolderPath, dir))
+        except OSError:
+            pass
