@@ -3,9 +3,7 @@ from tkinter import filedialog, messagebox, colorchooser, simpledialog, font
 import re
 from os.path import exists as path_exists
 from os import remove as remove_path
-
-from pyasn1_modules.rfc3280 import poste_restante_address
-
+from configs import TEXT_EDITOR_SIZES
 
 class TextEditor:
     def __init__(self, root, parent, settings,  file):
@@ -40,8 +38,7 @@ class TextEditor:
         self.sizeButton.pack(side="right", padx=2, pady=2, fill="y")
         self.size_menu = tk.Menu(self.sizeButton, tearoff=0)
         self.sizeButton.config(menu=self.size_menu)
-        sizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72]
-        for size in sizes:
+        for size in TEXT_EDITOR_SIZES:
             if size == self.settings["textSize"]:
                 self.size_menu.add_command(label=str(size), font=("Consolas", 10, "bold"), command=lambda s=size: self.change_size(s))
             else:
@@ -64,7 +61,7 @@ class TextEditor:
         self.root.bind("<Control-s>", lambda e: self.save_file(True))
         self.root.bind("<Control-S>", lambda e: self.save_file(True))
 
-        self.text = tk.Text(self.wysrodkowywacz, wrap="word", font=self.base_font, bg="grey15", fg="white", insertbackground="white", bd=0)
+        self.text = tk.Text(self.wysrodkowywacz, wrap="word", font=self.base_font, bg="grey15", fg="white", insertbackground="white", bd=0, undo=True)
         self.text.pack(side="left", fill="both", expand=True)
 
         self.scroll = None
@@ -252,7 +249,7 @@ class TextEditor:
             if not tag_name in tags:
                 all_have = False
                 break
-            current = self.text.index(f"{current}+1c")  # przejdź do następnego znaku
+            current = self.text.index(f"{current}+1c")
 
         return all_have
 
