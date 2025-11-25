@@ -12,8 +12,12 @@ def show_button(btn=None, reset=False):
     global previousOpenedButton
     if reset:
         previousOpenedButton = None
-    if previousOpenedButton:
-        previousOpenedButton.place_forget()
+    elif previousOpenedButton:
+        try:
+            previousOpenedButton.place_forget()
+        except:
+            pass
+
     if btn:
         previousOpenedButton = btn
         btn.place(relx=0.0, rely=0.0, anchor="nw", x=10, y=10)
@@ -28,3 +32,32 @@ def hide_button(event, btn, frame):
 
     if not (fx1 < x < fx2 and fy1 < y < fy2):
         btn.place_forget()
+
+def on_lost_focus(event, textPlace, root):
+    pressedWidgetClass = event.widget.winfo_containing(event.x_root, event.y_root).winfo_class()
+    if event.widget != textPlace and pressedWidgetClass != "Entry" and pressedWidgetClass != "Text":
+        stop_writing(root)
+
+def stop_writing(root):
+    root.focus_set()
+
+previousPressed = None
+def remember_the_last_pressed(event):
+    global previousPressed
+    previousPressed = event.widget.winfo_containing(event.x_root, event.y_root)
+
+def add_one_ldp(event, entry, button):  # ldp - lucid dream point | button is a label
+    global previousPressed
+    try:
+        if event.widget.winfo_containing(event.x_root, event.y_root) == button and button == previousPressed:
+            previousPressed = None
+            try:
+                value = int(entry.get())
+                if value:
+                    value += 1
+                    entry.delete(0, "end")
+                    entry.insert(0, str(value))
+            except ValueError:
+                pass
+    except:
+        pass
