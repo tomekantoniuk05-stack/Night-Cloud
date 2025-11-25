@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, colorchooser, simpledialog, font
+from tkinter import colorchooser, font
 import re
 from os.path import exists as path_exists
 from os import remove as remove_path
 from configs import TEXT_EDITOR_SIZES
+from animations import on_lost_focus, stop_writing
 
 class TextEditor:
     def __init__(self, root, parent, settings,  file):
@@ -64,15 +65,21 @@ class TextEditor:
         self.text = tk.Text(self.wysrodkowywacz, wrap="word", font=self.base_font, bg="grey15", fg="white", insertbackground="white", bd=0, undo=True)
         self.text.pack(side="left", fill="both", expand=True)
 
+        self.titleEntry.bind("<Return>", lambda e, root=root: stop_writing(root))
+
         self.scroll = None
         self.create_scroll()
 
         self.configure_tags()
 
+        self.hasMadeAnyModyfications = False
+        self.text.bind("<Key>", lambda e: setattr(self, "hasMadeAnyModyfications", True))
+        self.titleEntry.bind("<Key>", lambda e: setattr(self, "hasMadeAnyModyfications", True))
+
         self.open_file()
         self.add_placeholder()
 
-    def add_placeholder(self, event=None):
+    def add_placeholder(self, event=None): #placeholder title
         if self.titleEntry.get() == "":
             self.titleEntry.insert(0, "Title")
             self.titleEntry.config(fg="grey")
@@ -106,7 +113,6 @@ class TextEditor:
             else:
                 self.size_menu.entryconfig(i, font=("Consolas", 10))
 
-    #formatowanie
     def apply_tag(self, tag):
         try:
             if not self.check_tag(tag):
@@ -154,12 +160,6 @@ class TextEditor:
         self.configure_tags()
         self.create_scroll()
         self.fix_the_size_menu()
-
-    # --- FUNKCJE PLIKU ---
-    def new_file(self):
-        self.text.delete(1.0, "end")
-        self.file_path = None
-        self.root.title("Edytor tekstu PRO")
 
     def open_file(self):
         if path_exists(self.file):
@@ -232,6 +232,7 @@ class TextEditor:
                         f.write(f"<n>{segment_text}</n>")
 
                     start = next_index
+            self.hasMadeAnyModyfications = False
         elif path_exists(self.file):
             remove_path(self.file)
 
