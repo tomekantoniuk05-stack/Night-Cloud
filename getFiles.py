@@ -41,6 +41,10 @@ def load_files():
     else:
         with open(settingsFolderPath, "r", encoding="utf-8") as f:
             settings = json.load(f)
+        for name, val in get_default_settings().items():
+            if not settings.get(name):
+                settings[name] = val
+
     return dreamJournalFolderPath, settings
 
 def get_a_journal(monthAndYear):
